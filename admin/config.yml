@@ -27,6 +27,9 @@ collections:
       - { label: Project title, name: title, widget: string }
       - { label: Description, name: description, widget: text }
       - { label: Cover image, name: cover, widget: image }
+      - { label: Category, name: category, widget: string }
+      - { label: Year, name: year, widget: string }
+      - { label: Tags, name: tags, widget: list, required: false }
       - label: Gallery
         name: gallery
         widget: list
