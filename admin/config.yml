@@ -31,12 +31,12 @@ collections:
       - { label: Year, name: year, widget: string }
       - { label: Tags, name: tags, widget: list, required: false }
       - label: Gallery
-          name: gallery
-          widget: list
-          required: false
-          summary: "{{fields.image}}"
-          field:
-            label: Image
-            name: image
-            widget: image
+        name: gallery
+        widget: list
+        required: false
+        summary: "{{fields.image}}"
+        field:
+          label: Image
+          name: image
+          widget: image
       - { label: Project details, name: body, widget: markdown }
