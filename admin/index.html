@@ -1,50 +1,132 @@
 
 <!doctype html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>مدیریت پورتفولیو</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مدیریت پورتفولیو</title>
 
-    <style>
-      @media (max-width: 1000px) {
-        [class*="SidebarContainer"] {
-          position: static !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          box-sizing: border-box !important;
-        }
+  <style>
+    /* فضای اصلی پنل */
+    [class*="AppMainContainer"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
 
-        [class*="CollectionContainer"] {
-          display: flex !important;
-          flex-direction: column !important;
-          width: 100% !important;
-          min-width: 0 !important;
-          box-sizing: border-box !important;
-        }
+    /* منوی کناری سمت راست */
+    aside[class*="SidebarContainer"] {
+      position: fixed !important;
+      top: 0 !important;
+      right: 0 !important;
+      left: auto !important;
+      bottom: 0 !important;
+      width: 190px !important;
+      min-width: 190px !important;
+      max-width: 190px !important;
+      height: 100vh !important;
+      overflow-y: auto !important;
+      box-sizing: border-box !important;
+      z-index: 100 !important;
+      border-radius: 0 !important;
+    }
 
-        [class*="CollectionMain"] {
-          width: 100% !important;
-          min-width: 0 !important;
-          max-width: 100% !important;
-          box-sizing: border-box !important;
-          padding-left: 0 !important;
-          padding-right: 0 !important;
-          margin-left: 0 !important;
-          margin-right: 0 !important;
-        }
+    /* فهرست منو */
+    aside[class*="SidebarContainer"] ul {
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
 
-        [class*="CardsGrid"] {
-          width: 100% !important;
-          max-width: 100% !important;
-          box-sizing: border-box !important;
-          margin-left: 0 !important;
-          margin-right: 0 !important;
-        }
+    aside[class*="SidebarContainer"] a {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow-wrap: anywhere !important;
+    }
+
+    /* فضای محتوای اصلی؛ کنار منو */
+    main[class*="CollectionMain"] {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      margin-right: 190px !important;
+      margin-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    div[class*="CollectionContainer"] {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding-right: 16px !important;
+      padding-left: 16px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* کارت‌های نمونه و پروژه‌ها */
+    ul[class*="CardsGrid"] {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)) !important;
+      gap: 16px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    ul[class*="CardsGrid"] > li {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    ul[class*="CardsGrid"] a {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    ul[class*="CardsGrid"] img,
+    ul[class*="CardsGrid"] [data-testid="entry-card-image"] {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* نمایش در صفحه‌های باریک */
+    @media (max-width: 600px) {
+      aside[class*="SidebarContainer"] {
+        width: 68px !important;
+        min-width: 68px !important;
+        max-width: 68px !important;
       }
-    </style>
-  </head>
-  <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  </body>
+
+      aside[class*="SidebarContainer"] h2 {
+        display: none !important;
+      }
+
+      aside[class*="SidebarContainer"] a {
+        padding-right: 4px !important;
+        padding-left: 4px !important;
+        font-size: 11px !important;
+        text-align: center !important;
+      }
+
+      main[class*="CollectionMain"] {
+        margin-right: 68px !important;
+      }
+
+      div[class*="CollectionContainer"] {
+        padding-right: 8px !important;
+        padding-left: 8px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+</body>
 </html>
+
