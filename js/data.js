@@ -1,17 +1,18 @@
-/* 
+/*
  * لایه داده مستقل برای آماده‌سازی اتصال آینده به CMS.
  * GitHub Pages فقط فایل‌های استاتیک را اجرا می‌کند؛ این فایل فعلاً منبع محتوای سایت است.
  * داده‌های واقعی مدیر و محتوای قابل ویرایش بعداً باید از CMS امن خوانده شوند.
  */
-window.PORTFOLIO_DATA={
- site:{
-  title:'سلام، من کامیارم؛ طراح گرافیک و ایده‌پرداز بصری',
-  introduction:'طراحی درست و اصولی بخش بزرگی از ارتباط درست با مخاطب برای فروش محصول یا اثرگذاری یا هر کار دیگه ای هست',
-  phone:'09944830069',
-  instagram:'no_kamyar',
-  telegram:'kamyar_no',
-  email:'kamyar.norouzian.904@gmail.com',
-  messengers:['بله','سروش','روبیکا','ایتا']
- },
-projects:[],
+window.PORTFOLIO_DATA = {
+  site: {
+    title: 'سلام، من کامیارم؛ طراح گرافیک و ایده‌پرداز بصری',
+    introduction: 'طراحی درست و اصولی بخش بزرگی از ارتباط درست با مخاطب برای فروش محصول یا اثرگذاری یا هر کار دیگه ای هست',
+    phone: '09944830069',
+    instagram: 'no_kamyar',
+    telegram: 'kamyar_no',
+    email: 'kamyar.norouzian.904@gmail.com',
+    messengers: ['بله', 'سروش', 'روبیکا', 'ایتا']
+  },
+  projects: [],
+  articles: []
 };
