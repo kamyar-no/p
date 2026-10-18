@@ -7,25 +7,29 @@ media_folder: "images/uploads"
 public_folder: "/p/images/uploads"
 
 collections:
-  - name: "articles"
-    label: "مقالات"
-    folder: "content/articles"
+  - name: articles
+    label: Articles
+    folder: content/articles
     create: true
     slug: "{{slug}}"
     fields:
-      - { label: "عنوان", name: "title", widget: "string" }
-      - { label: "تاریخ انتشار", name: "date", widget: "datetime" }
-      - { label: "تصویر شاخص", name: "thumbnail", widget: "image", required: false }
-      - { label: "متن مقاله", name: "body", widget: "markdown" }
+      - { label: Title, name: title, widget: string }
+      - { label: Publication date, name: date, widget: datetime }
+      - { label: Featured image, name: thumbnail, widget: image, required: false }
+      - { label: Article body, name: body, widget: markdown }
 
-  - name: "portfolio"
-    label: "نمونه‌کارها"
-    folder: "content/portfolio"
+  - name: portfolio
+    label: Portfolio
+    folder: content/portfolio
     create: true
     slug: "{{slug}}"
     fields:
-      - { label: "عنوان پروژه", name: "title", widget: "string" }
-      - { label: "توضیحات", name: "description", widget: "text" }
-      - { label: "تصویر کاور", name: "cover", widget: "image" }
-      - { label: "گالری تصاویر", name: "gallery", widget: "list", required: false, field: { label: "تصویر", name: "image", widget: "image" } }
-      - { label: "شرح پروژه", name: "body", widget: "markdown" }
+      - { label: Project title, name: title, widget: string }
+      - { label: Description, name: description, widget: text }
+      - { label: Cover image, name: cover, widget: image }
+      - label: Gallery
+        name: gallery
+        widget: list
+        required: false
+        field: { label: Image, name: image, widget: image }
+      - { label: Project details, name: body, widget: markdown }
