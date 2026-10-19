@@ -1,84 +1,59 @@
+
 (()=>{
 const D=window.PORTFOLIO_DATA, app=document.getElementById('app'), projects=D.projects, articles=D.articles;
 const nav=[['/','خانه'],['/portfolio','نمونه‌کارها'],['/articles','مقالات'],['/about','درباره من'],['/contact','ارتباط']];
 const paths={left:'<path d="M19 12H5M12 19l-7-7 7-7"/>',down:'<path d="M7 7l10 10M17 7v10H7"/>',up:'<path d="M18 15l-6-6-6 6M12 9v12"/>',menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',close:'<path d="M18 6L6 18M6 6l12 12"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 4.5v15"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',send:'<path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/>',pen:'<path d="m12 19 7-7 3 3-7 7-3-3zM2 22l4-1L17 10l-3-3L3 18z"/>',message:'<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/>',external:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',check:'<path d="m5 12 4 4L19 6"/>'};
 const I=(n,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[n]||paths.left}</svg>`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
 function renderMarkdown(markdown) {
   const inline = (text) => {
     let s = esc(text);
-
     s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-    s = s.replace(
-      /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,
-      (_, label, url) =>
-        `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`
-    );
-
-    s = s.replace(/\*\*(.+?)\*\*|__(.+?)__/g,
-      (_, a, b) => `<strong>${a || b}</strong>`);
-
-    s = s.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)|_([^_\n]+)_/g,
-      (_, a, b) => `<em>${a || b}</em>`);
-
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,(_,label,url)=>`<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`);
+    s = s.replace(/\*\*(.+?)\*\*|__(.+?)__/g,(_,a,b)=>`<strong>${a||b}</strong>`);
+    s = s.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)|_([^_\n]+)_/g,(_,a,b)=>`<em>${a||b}</em>`);
     return s;
   };
-
-  const lines = String(markdown || '')
-    .replace(/\r\n?/g, '\n')
-    .split('\n');
-
+  const lines = String(markdown || '').replace(/\r\n?/g, '\n').split('\n');
   const out = [];
   let paragraph = [];
   let list = null;
-
   const flushParagraph = () => {
     if (paragraph.length) {
       out.push(`<p>${inline(paragraph.join(' '))}</p>`);
       paragraph = [];
     }
   };
-
   const closeList = () => {
     if (list) {
       out.push(`</${list}>`);
       list = null;
     }
   };
-
   for (const line of lines) {
     const t = line.trim();
-
     if (!t) {
       flushParagraph();
       closeList();
       continue;
     }
-
     const heading = t.match(/^(#{1,6})\s+(.+)$/);
     const bullet = t.match(/^[-*+]\s+(.+)$/);
     const numbered = t.match(/^\d+[.)]\s+(.+)$/);
     const quote = t.match(/^>\s?(.*)$/);
-
     if (heading) {
       flushParagraph();
       closeList();
-
       const level = heading[1].length;
       out.push(`<h${level}>${inline(heading[2])}</h${level}>`);
     } else if (bullet || numbered) {
       flushParagraph();
-
       const nextList = bullet ? 'ul' : 'ol';
-
       if (list !== nextList) {
         closeList();
         out.push(`<${nextList}>`);
         list = nextList;
       }
-
       out.push(`<li>${inline((bullet || numbered)[1])}</li>`);
     } else if (quote) {
       flushParagraph();
@@ -89,52 +64,21 @@ function renderMarkdown(markdown) {
       paragraph.push(t);
     }
   }
-
   flushParagraph();
   closeList();
-
   return out.join('\n');
 }
-
 function formatArticleDate(value) {
   if (!value) return '';
-
   const raw = String(value).trim();
   const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-
-  const date = match
-    ? new Date(Date.UTC(
-        Number(match[1]),
-        Number(match[2]) - 1,
-        Number(match[3]),
-        12
-      ))
-    : new Date(raw);
-
+  const date = match ? new Date(Date.UTC(Number(match[1]),Number(match[2])-1,Number(match[3]),12)) : new Date(raw);
   if (Number.isNaN(date.getTime())) return raw;
-
-  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'Asia/Tehran'
-  }).format(date);
+  return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'long',day:'numeric',timeZone:'Asia/Tehran'}).format(date);
 }
-
 function getPlainText(markdown) {
-  return String(markdown || '')
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/^#{1,6}\s+/gm, '')
-    .replace(/^\s*[-*+]\s+/gm, '')
-    .replace(/^\s*\d+[.)]\s+/gm, '')
-    .replace(/^\s*>\s?/gm, '')
-    .replace(/\*\*|__|[*_`]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return String(markdown || '').replace(/```[\s\S]*?```/g,'').replace(/!\[([^\]]*)\]\([^)]+\)/g,'$1').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/^#{1,6}\s+/gm,'').replace(/^\s*[-*+]\s+/gm,'').replace(/^\s*\d+[.)]\s+/gm,'').replace(/^\s*>\s?/gm,'').replace(/\*\*|__|[*_`]/g,'').replace(/\s+/g,' ').trim();
 }
-
 const route=()=>{let r=(location.hash.slice(1)||'/').split('?')[0];return r.startsWith('/')?r:'/'+r};
 const params=()=>new URLSearchParams(location.hash.split('?')[1]||'');
 const ey=(s,light=false)=>`<span class="eyebrow ${light?'light':''}"><i></i>${s}</span>`;
@@ -142,9 +86,7 @@ const header=r=>`<header class="site-header"><div class="header-inner container"
 const footer=()=>`<footer class="footer"><div class="container footer-top"><div><a href="#/" class="brand footer-brand"><span class="brand-mark">ک</span><span><strong>کامیار</strong><small>طراح گرافیک</small></span></a></div><div class="footer-links"><a href="#/portfolio">نمونه‌کارها</a><a href="#/articles">مقالات</a><a href="#/contact">ارتباط با من</a></div><a class="back-top" href="#top">بازگشت به بالا ${I('up',16)}</a></div><div class="container footer-bottom"><span>© ۱۴۰۵ تمامی حقوق محفوظ است.</span></div></footer><button class="floating-top" id="floating-top" aria-label="بازگشت به بالا">${I('up',18)}</button>`;
 const contactStrip=()=>`<section class="contact-section container"><div class="contact-panel"><div class="contact-copy">${ey('در ارتباط باشیم',true)}<h2>پروژه‌ای در ذهن داری؟<br><em>با هم درباره‌اش حرف بزنیم.</em></h2><p>اگر برای برند یا کسب‌وکارت به طراحی نیاز داری، خوشحال می‌شوم بیشتر بدانم.</p><a href="#/contact" class="button button-lime">شروع گفتگو ${I('left',18)}</a></div><div class="contact-orbit"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit-core">${I('message',38)}</div><span class="orbit-label">LET'S<br>CREATE</span></div></div></section>`;
 const heading=(e,t,d)=>`<div class="page-heading">${ey(e)}<h1>${t}</h1><p>${d}</p></div>`;
-
 const pc=(p,i=0)=>`<a href="#/portfolio/${encodeURIComponent(p.id)}" class="project-card project-${i%3}"><div class="project-image"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"><span class="image-arrow">${I('down',20)}</span><span class="project-year">${esc(p.year)}</span></div><div class="project-info"><div><span class="project-category">${esc(p.category)}</span><h3>${esc(p.title)}</h3></div>${I('left',19)}</div></a>`;
-
 const ac=(a,i=0)=>`<a href="#/articles/${encodeURIComponent(a.id)}" class="article-card article-${i%3}"><div class="article-image"><img src="${esc(a.image)}" alt="${esc(a.title)}" loading="lazy"></div><div class="article-copy"><div class="article-meta"><span>${esc(a.category)}</span><span>${esc(formatArticleDate(a.date))}</span></div><h3>${esc(a.title)}</h3><p>${esc(a.excerpt)}</p><span class="read-more">ادامه مقاله ${I('left',16)}</span></div></a>`;
 
 function home(){return `<main id="top"><section class="hero container"><div class="hero-copy">${ey('نگاهی به آثار و پروژه‌های من')}<h1>سلام، من کامیارم؛<br><span>طراح گرافیک</span></h1><p class="hero-lead">${esc(D.site.introduction)}</p><div class="hero-actions"><a class="button button-dark" href="#/portfolio">دیدن نمونه‌کارها ${I('left',18)}</a><a class="text-link" href="#/about">بیشتر درباره من ${I('down',17)}</a></div><div class="hero-stats"><div><strong>۰۱<span>—</span></strong><small>نگاه هدفمند</small></div><div><strong>۰۲<span>—</span></strong><small>ایده تا اجرا</small></div><div><strong>۰۳<span>—</span></strong><small>توجه به جزئیات</small></div></div></div><div class="hero-art"><div class="hero-image-wrap"><img src="images/hero-project.webp?auto=format&fit=crop&w=1100&q=85" alt="ترکیب انتزاعی از رنگ و فرم"><div class="art-overlay"></div><span class="art-stamp">IDEAS<br>INTO<br><b>DESIGN.</b></span><div class="art-caption"><span>VISUAL DESIGN</span><span>۱۴۰۵ / ۲۰۲۶</span></div></div><div class="hero-note">${I('pen',17)}<span>طراحی با فکر شروع می‌شود.</span></div><span class="hero-index">K—01</span></div><div class="hero-scroll"><span>پایین‌تر را ببین</span>${I('down',16)}</div></section><section class="portfolio-promo container"><div class="promo-top">${ey('منتخب پروژه‌ها')}<span class="section-number">۰۱ / WORK</span></div><div class="promo-content"><div><h2>هر پروژه،<br><span>یک مسئله‌ی تازه.</span></h2><p>از بسته‌بندی و هویت بصری تا طراحی دیجیتال؛ هر کار از شناخت مسئله شروع می‌شود و با توجه به جزئیات شکل می‌گیرد.</p></div><a href="#/portfolio" class="button button-outline">مشاهده آرشیو نمونه‌کارها ${I('left',18)}</a></div><div class="promo-preview"><div class="promo-tile tile-lime"><span>PACKAGING<br>DESIGN</span><b>01</b><div class="tile-shape shape-circle"></div></div><div class="promo-tile tile-peach"><span>VISUAL<br>IDENTITY</span><b>02</b><div class="tile-shape shape-square"></div></div><div class="promo-tile tile-blue"><span>DIGITAL<br>EXPERIENCE</span><b>03</b><div class="tile-shape shape-ring"></div></div><div class="promo-note">پروژه‌ها<br>${I('down',20)}</div></div></section><section class="latest-articles container"><div class="section-header"><div>${ey('یادداشت‌ها و تجربه‌ها')}<h2>آخرین <span>مقالات</span></h2><p>درباره‌ی طراحی، ایده‌پردازی و تصمیم‌هایی که پشت یک خروجی خوب هستند.</p></div><a href="#/articles" class="text-link">همه مقالات ${I('left',18)}</a></div><div class="articles-grid">${articles.slice(0,3).map(ac).join('')}</div></section>${contactStrip()}</main>`;}
@@ -158,150 +100,99 @@ function articlesPage(){let p=params(),cat=p.get('category')||'همه',q=p.get('
 function articleDetail(id){
   const a=articles.find(x=>x.id===id);
   if(!a)return notFound();
-
-  const body=Array.isArray(a.body)
-    ?a.body.join('\n\n')
-    :String(a.body||'');
-
+  const body=Array.isArray(a.body)?a.body.join('\n\n'):String(a.body||'');
   return `<main class="inner-page container article-detail" id="top">
     <a href="#/articles" class="back-link">${I('left',17)} بازگشت به مقالات</a>
     <article>
       <div class="article-detail-heading">
         ${ey(`${esc(a.category)} · ${esc(formatArticleDate(a.date))}`)}
-        <h1>${esc(a.title)}</h1>
-        <p>${esc(a.excerpt)}</p>
+        <h1>${esc(a.title)}</h1><p>${esc(a.excerpt)}</p>
       </div>
       ${a.image?`<img class="article-hero-image" src="${esc(a.image)}" alt="${esc(a.title)}">`:''}
       <div class="article-body">${renderMarkdown(body)}</div>
     </article>
-    <div class="article-bottom-link">
-      <span>مطالب بیشتری بخوان</span>
-      <a href="#/articles">رفتن به آرشیو مقالات ${I('left',18)}</a>
-    </div>
+    <div class="article-bottom-link"><span>مطالب بیشتری بخوان</span><a href="#/articles">رفتن به آرشیو مقالات ${I('left',18)}</a></div>
   </main>`;
 }
 
 function about(){return `<main class="inner-page container about-page" id="top">${heading('کمی درباره من','طراحی برای من، یعنی <span>فکر کردن با تصویر.</span>','من کامیارم؛ طراح گرافیک و علاقه‌مند به ساخت زبان‌های بصری متمایز برای محصولات، برندها و ایده‌ها.')}<div class="about-layout"><div class="about-art"><div class="about-art-bg"><span>THINK</span><span>MAKE</span><span>REFINE</span><div class="about-shape"></div></div><span class="about-caption">DESIGN IS A PROCESS.</span></div><div class="about-copy">${ey('رویکرد من')}<h2>از شناخت مسئله<br>تا اجرای دقیق.</h2><p>به نظرم طراحی خوب فقط ظاهر جذاب نیست؛ باید بتواند یک پیام را واضح‌تر کند، به محصول شخصیت بدهد و تجربه‌ای به‌یادماندنی بسازد.</p><p>در هر پروژه تلاش می‌کنم ابتدا مسئله و مخاطب را بشناسم، بعد سراغ ایده‌ها بروم و در نهایت با دقت روی جزئیات، خروجی را به نتیجه‌ای منسجم برسانم.</p><div class="approach-list"><div><span>۰۱</span><strong>شناخت و تحقیق</strong><small>درک هدف و مخاطب پروژه</small></div><div><span>۰۲</span><strong>ایده‌پردازی</strong><small>پیدا کردن مسیر بصری مناسب</small></div><div><span>۰۳</span><strong>اجرا و اصلاح</strong><small>توجه به جزئیات و کیفیت خروجی</small></div></div><a href="#/contact" class="button button-dark">درباره پروژه‌ات صحبت کنیم ${I('left',18)}</a></div></div></main>`;}
 
-function contact(){const c=D.site;const phone=esc(c.phone);return `<main class="inner-page container contact-page" id="top">${heading('ارتباط با من','یک ایده داری؟ <span>از همین‌جا شروع کنیم.</span>','برای سفارش طراحی، همکاری یا گفت‌وگو درباره یک ایده، از راه‌های زیر با من در ارتباط باش.')}<div class="contact-layout"><div class="contact-methods"><a href="https://instagram.com/${encodeURIComponent(c.instagram)}" target="_blank" rel="noopener noreferrer" class="contact-method"><span class="method-icon">◎</span><span><small>اینستاگرام</small><strong>@${esc(c.instagram)}</strong></span>${I('external',17)}</a><a href="https://t.me/${encodeURIComponent(c.telegram)}" target="_blank" rel="noopener noreferrer" class="contact-method"><span class="method-icon">${I('send',20)}</span><span><small>تلگرام</small><strong>@${esc(c.telegram)}</strong></span>${I('external',17)}</a><a href="mailto:${esc(c.email)}" class="contact-method"><span class="method-icon">${I('mail',20)}</span><span><small>ایمیل</small><strong>${esc(c.email)}</strong></span>${I('external',17)}</a><a href="tel:${phone}" class="contact-method"><span class="method-icon">${I('message',20)}</span><span><small>تلفن</small><strong>${phone}</strong></span>${I('external',17)}</a><div class="contact-method">
-  <span class="method-icon">${I('message',20)}</span>
-  <span>
-    <small>پیام‌رسان‌های ایرانی (سروش، بله، روبیکا، ایتا)</small>
-    <strong>${phone}</strong>
-  </span>
-</div></div><form class="contact-form" id="contact-form">${ey('فرم شروع همکاری')}<h2>درباره پروژه‌ات بگو.</h2><label>نام<input required placeholder="نام شما"></label><label>راه ارتباطی<input required placeholder="ایمیل یا شماره تماس"></label><label>موضوع پروژه<select required><option value="" disabled selected>انتخاب موضوع</option><option>بسته‌بندی</option><option>هویت بصری</option><option>طراحی تبلیغاتی</option><option>سایر</option></select></label><label>توضیحات<textarea required rows="4" placeholder="کمی درباره ایده‌ات بنویس..."></textarea></label><button class="button button-dark" type="submit">ثبت پیام ${I('left',18)}</button></form></div></main>`;}
+function contact(){
+  const c=D.site;
+  const phone=esc(c.phone);
+  return `<main class="inner-page container contact-page" id="top">${heading('ارتباط با من','یک ایده داری؟ <span>از همین‌جا شروع کنیم.</span>','برای سفارش طراحی، همکاری یا گفت‌وگو درباره یک ایده، از راه‌های زیر با من در ارتباط باش.')}<div class="contact-layout"><div class="contact-methods"><a href="https://instagram.com/${encodeURIComponent(c.instagram)}" target="_blank" rel="noopener noreferrer" class="contact-method"><span class="method-icon">◎</span><span><small>اینستاگرام</small><strong>@${esc(c.instagram)}</strong></span>${I('external',17)}</a><a href="https://t.me/${encodeURIComponent(c.telegram)}" target="_blank" rel="noopener noreferrer" class="contact-method"><span class="method-icon">${I('send',20)}</span><span><small>تلگرام</small><strong>@${esc(c.telegram)}</strong></span>${I('external',17)}</a><a href="mailto:${esc(c.email)}" class="contact-method"><span class="method-icon">${I('mail',20)}</span><span><small>ایمیل</small><strong>${esc(c.email)}</strong></span>${I('external',17)}</a><a href="tel:${phone}" class="contact-method"><span class="method-icon">${I('message',20)}</span><span><small>تلفن</small><strong>${phone}</strong></span>${I('external',17)}</a><div class="contact-method"><span class="method-icon">${I('message',20)}</span><span><small>پیام‌رسان‌های ایرانی (سروش، بله، روبیکا، ایتا)</small><strong>${phone}</strong></span></div></div>
+  <form class="contact-form" id="contact-form">
+    <input type="hidden" name="access_key" value="a42f74fc-a182-40a1-bfaf-582a52b6e3da">
+    <input type="hidden" name="subject" value="پیام جدید از سایت پورتفولیوی کامیار">
+    <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+    ${ey('فرم شروع همکاری')}
+    <h2>درباره پروژه‌ات بگو.</h2>
+    <label>نام<input name="name" required placeholder="نام شما"></label>
+    <label>راه ارتباطی<input name="contact" required placeholder="ایمیل یا شماره تماس"></label>
+    <label>موضوع پروژه<select name="project_type" required><option value="" disabled selected>انتخاب موضوع</option><option>بسته‌بندی</option><option>هویت بصری</option><option>طراحی تبلیغاتی</option><option>سایر</option></select></label>
+    <label>توضیحات<textarea name="message" required rows="4" placeholder="کمی درباره ایده‌ات بنویس..."></textarea></label>
+    <button class="button button-dark" type="submit">ثبت پیام ${I('left',18)}</button>
+  </form></div></main>`;
+}
 
 const notFound=()=>`<main class="inner-page container not-found" id="top">${ey('404 / پیدا نشد')}<h1>این صفحه انگار<br><span>جای دیگری‌ست.</span></h1><a href="#/" class="button button-dark">بازگشت به خانه ${I('left',18)}</a></main>`;
 
 async function loadCMSContent(){
   const repo='kamyar-no/p',branch='main';
-
   async function loadCollection(folder){
     try{
       const response=await fetch(`https://api.github.com/repos/${repo}/contents/${folder}?ref=${branch}`);
       if(!response.ok)return [];
-
       const files=await response.json();
-
-      return (await Promise.all(
-        files.filter(f=>f.name.endsWith('.md')).map(async file=>{
-          try{
-            const response=await fetch(file.download_url);
-            if(!response.ok)return null;
-
-            const text=await response.text();
-            const match=text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)([\s\S]*)$/);
-            if(!match)return null;
-
-            const lines=match[1].split(/\r?\n/),data={};
-            let listKey=null;
-
-            for(const line of lines){
-              const listItem=line.match(/^\s+-\s+(.*)$/);
-
-              if(listItem&&listKey){
-                if(!Array.isArray(data[listKey]))data[listKey]=[];
-                data[listKey].push(listItem[1].replace(/^["']|["']$/g,'').trim());
-                continue;
-              }
-
-              const field=line.match(/^([\w-]+):(?:\s*(.*))?$/);
-
-              if(field){
-                listKey=null;
-                const key=field[1],value=(field[2]||'').trim();
-
-                if(!value){
-                  data[key]=[];
-                  listKey=key;
-                }else{
-                  data[key]=value.replace(/^["']|["']$/g,'');
-                }
-              }
+      return (await Promise.all(files.filter(f=>f.name.endsWith('.md')).map(async file=>{
+        try{
+          const response=await fetch(file.download_url);
+          if(!response.ok)return null;
+          const text=await response.text();
+          const match=text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)([\s\S]*)$/);
+          if(!match)return null;
+          const lines=match[1].split(/\r?\n/),data={};
+          let listKey=null;
+          for(const line of lines){
+            const listItem=line.match(/^\s+-\s+(.*)$/);
+            if(listItem&&listKey){
+              if(!Array.isArray(data[listKey]))data[listKey]=[];
+              data[listKey].push(listItem[1].replace(/^["']|["']$/g,'').trim());
+              continue;
             }
-
-            return {
-              ...data,
-              id:file.name.replace(/\.md$/,''),
-              body:match[2].trim()
-            };
-          }catch(error){
-            console.error('CMS file loading failed:',file.name,error);
-            return null;
+            const field=line.match(/^([\w-]+):(?:\s*(.*))?$/);
+            if(field){
+              listKey=null;
+              const key=field[1],value=(field[2]||'').trim();
+              if(!value){data[key]=[];listKey=key;}
+              else data[key]=value.replace(/^["']|["']$/g,'');
+            }
           }
-        })
-      )).filter(Boolean);
+          return {...data,id:file.name.replace(/\.md$/,''),body:match[2].trim()};
+        }catch(error){
+          console.error('CMS file loading failed:',file.name,error);
+          return null;
+        }
+      }))).filter(Boolean);
     }catch(error){
       console.error('CMS collection loading failed:',folder,error);
       return [];
     }
   }
-
-  const [cmsProjects,cmsArticles]=await Promise.all([
-    loadCollection('content/portfolio'),
-    loadCollection('content/articles')
-  ]);
-
+  const [cmsProjects,cmsArticles]=await Promise.all([loadCollection('content/portfolio'),loadCollection('content/articles')]);
   for(const item of cmsProjects){
-    const gallery=Array.isArray(item.gallery)
-      ?item.gallery.map(x=>typeof x==='string'?x:x?.image).filter(Boolean)
-      :[];
-
+    const gallery=Array.isArray(item.gallery)?item.gallery.map(x=>typeof x==='string'?x:x?.image).filter(Boolean):[];
     const tags=Array.isArray(item.tags)?item.tags:[];
-
-    const project={
-      id:item.id,
-      title:item.title||item.id,
-      description:item.description||'',
-      image:item.cover||item.image||'',
-      category:item.category||'نمونه‌کار',
-      year:item.year||'۱۴۰۵',
-      tags,
-      gallery
-    };
-
+    const project={id:item.id,title:item.title||item.id,description:item.description||'',image:item.cover||item.image||'',category:item.category||'نمونه‌کار',year:item.year||'۱۴۰۵',tags,gallery};
     const index=projects.findIndex(p=>p.id===project.id);
-
     if(index>=0)projects[index]={...projects[index],...project};
     else projects.push(project);
   }
-
   for(const item of cmsArticles){
     const body=item.body||'';
     const plainText=getPlainText(body);
-
-    const article={
-      id:item.id,
-      title:item.title||item.id,
-      date:item.date||'',
-      category:item.category||'مقاله',
-      image:item.thumbnail||item.image||'',
-      excerpt:item.excerpt||plainText.slice(0,180),
-      body
-    };
-
+    const article={id:item.id,title:item.title||item.id,date:item.date||'',category:item.category||'مقاله',image:item.thumbnail||item.image||'',excerpt:item.excerpt||plainText.slice(0,180),body};
     const index=articles.findIndex(a=>a.id===article.id);
-
     if(index>=0)articles[index]={...articles[index],...article};
     else articles.push(article);
   }
@@ -309,7 +200,6 @@ async function loadCMSContent(){
 
 function render(){
   let r=route(),content;
-
   if(r==='/')content=home();
   else if(r==='/portfolio')content=portfolio();
   else if(r.startsWith('/portfolio/'))content=projectDetail(decodeURIComponent(r.split('/')[2]||''));
@@ -318,9 +208,7 @@ function render(){
   else if(r==='/about')content=about();
   else if(r==='/contact')content=contact();
   else content=notFound();
-
   document.title=({'/':'کامیار | طراح گرافیک','/portfolio':'نمونه‌کارها | کامیار','/articles':'مقالات | کامیار','/about':'درباره من | کامیار','/contact':'ارتباط | کامیار'})[r]||'کامیار | پورتفولیو';
-
   app.innerHTML=header(r)+content+footer();
   window.scrollTo({top:0,behavior:'auto'});
   bind();
@@ -328,81 +216,93 @@ function render(){
 
 function bind(){
   setupReveals();
-
   let toggle=document.getElementById('menu-toggle');
-
   if(toggle)toggle.onclick=()=>{
     let n=document.getElementById('main-nav'),o=n.classList.toggle('open');
     toggle.innerHTML=I(o?'close':'menu',20);
   };
-
   document.querySelectorAll('.back-top,#floating-top').forEach(x=>x.onclick=e=>{
     e.preventDefault();
     window.scrollTo({top:0,behavior:'smooth'});
   });
-
   document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{
     let p=params();
     p.set('category',b.dataset.cat);
     if(!p.has('q'))p.set('q','');
     location.hash=(b.dataset.kind==='project'?'/portfolio':'/articles')+'?'+p.toString();
   });
-
   let ps=document.getElementById('project-search');
   if(ps)ps.oninput=()=>updateSearch('project',ps.value);
-
   let as=document.getElementById('article-search');
   if(as)as.oninput=()=>updateSearch('article',as.value);
 
-  let cf=document.getElementById('contact-form');
-  if(cf)cf.onsubmit=e=>e.preventDefault();
+  const cf=document.getElementById('contact-form');
+  if(cf){
+    cf.onsubmit=async(e)=>{
+      e.preventDefault();
+      const button=cf.querySelector('button[type="submit"]');
+      const status=document.getElementById('form-status');
+      const originalHTML=button.innerHTML;
+      if(button.disabled)return;
+      button.disabled=true;
+      button.textContent='در حال ارسال...';
+      status.textContent='';
+      try{
+        const response=await fetch('https://api.web3forms.com/submit',{
+          method:'POST',
+          body:new FormData(cf)
+        });
+        const result=await response.json();
+        if(!response.ok||!result.success){
+          throw new Error(result.message||'ارسال پیام ناموفق بود.');
+        }
+        status.textContent='پیامت با موفقیت ارسال شد.';
+        cf.reset();
+      }catch(error){
+        console.error('Contact form error:',error);
+        status.textContent='ارسال پیام انجام نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.';
+      }finally{
+        button.disabled=false;
+        button.innerHTML=originalHTML;
+      }
+    };
+  }
 }
 
 function updateSearch(kind,value){
   let p=params();
   p.set('q',value);
   if(!p.has('category'))p.set('category','همه');
-
   let y=scrollY;
-
   history.replaceState(null,'','#/'+(kind==='project'?'portfolio':'articles')+'?'+p.toString());
-
   let r=route();
   app.innerHTML=header(r)+(kind==='project'?portfolio():articlesPage())+footer();
   bind();
-
   let el=document.getElementById(kind==='project'?'project-search':'article-search');
-
   if(el){
     el.focus();
     el.setSelectionRange(value.length,value.length);
   }
-
   scrollTo({top:y,behavior:'auto'});
 }
 
 function setupReveals(){
   const nodes=document.querySelectorAll('.hero-copy,.hero-art,.portfolio-promo,.latest-articles,.contact-section,.project-card,.article-card,.section-header,.page-heading,.about-layout,.contact-layout');
-
   nodes.forEach((n,i)=>{
     n.classList.add('reveal');
     n.style.transitionDelay=(i%5)*65+'ms';
   });
-
   if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){
     nodes.forEach(n=>n.classList.add('is-visible'));
     return;
   }
-
   document.documentElement.classList.add('reveal-ready');
-
   const io=new IntersectionObserver(entries=>entries.forEach(e=>{
     if(e.isIntersecting){
       e.target.classList.add('is-visible');
       io.unobserve(e.target);
     }
   }),{threshold:.12});
-
   nodes.forEach(n=>io.observe(n));
 }
 
