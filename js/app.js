@@ -208,7 +208,7 @@ function render(){
   else if(r==='/about')content=about();
   else if(r==='/contact')content=contact();
   else content=notFound();
-  document.title=({'/':'کامیار | طراح گرافیک','/portfolio':'نمونه‌کارها | کامیار','/articles':'مقالات | کامیار','/about':'درباره من | کامیار','/contact':'ارتباط | کامیار'})[r]||'کامیار | پورتفولیو';
+  document.title=({'/':'کامیار نوروزیان | طراح گرافیک','/portfolio':'نمونه‌کارها | کامیار','/articles':'مقالات | کامیار','/about':'درباره من | کامیار','/contact':'ارتباط | کامیار'})[r]||'کامیار | پورتفولیو';
   app.innerHTML=header(r)+content+footer();
   window.scrollTo({top:0,behavior:'auto'});
   bind();
