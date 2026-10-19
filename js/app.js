@@ -97,10 +97,19 @@ function projectDetail(id){let p=projects.find(x=>x.id===id);if(!p)return notFou
 
 function articlesPage(){let p=params(),cat=p.get('category')||'همه',q=p.get('q')||'',cats=['همه',...new Set(articles.map(x=>x.category))],list=articles.filter(x=>(cat==='همه'||x.category===cat)&&`${x.title} ${x.excerpt} ${x.category}`.toLocaleLowerCase('fa').includes(q.toLocaleLowerCase('fa')));return `<main class="inner-page container" id="top">${heading('مجله طراحی','فکرها را <span>مکتوب می‌کنم.</span>','یادداشت‌هایی درباره‌ی طراحی گرافیک، فرایند خلاقیت و انتخاب‌های بصری.')}<div class="archive-tools"><div class="filter-list">${cats.map(c=>`<button class="filter ${cat===c?'active':''}" data-kind="article" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div><label class="search-box">${I('search',17)}<input id="article-search" value="${esc(q)}" placeholder="جست‌وجوی مقاله..."></label></div><div class="articles-grid archive-articles">${list.map(ac).join('')}</div>${list.length?'':'<div class="empty-state">مقاله‌ای پیدا نشد.</div>'}</main>`;}
 
-
 function articleDetail(id) {
   let a = articles.find(x => x.id === id);
   if (!a) return notFound();
+
+  let bodyHTML = '';
+
+  if (Array.isArray(a.body)) {
+    bodyHTML = a.body
+      .map(x => `<p>${esc(x)}</p>`)
+      .join('');
+  } else if (typeof a.body === 'string') {
+    bodyHTML = renderMarkdown(a.body);
+  }
 
   return `<main class="inner-page container article-detail" id="top">
     <a href="#/articles" class="back-link">
@@ -120,7 +129,7 @@ function articleDetail(id) {
       >
 
       <div class="article-body">
-        ${a.body.map(x => `<p>${esc(x)}</p>`).join('')}
+        ${bodyHTML}
 
         <div class="article-callout">
           <span>یادداشت طراحی</span>
@@ -137,7 +146,6 @@ function articleDetail(id) {
     </div>
   </main>`;
 }
-
 
 function about(){return `<main class="inner-page container about-page" id="top">${heading('کمی درباره من','طراحی برای من، یعنی <span>فکر کردن با تصویر.</span>','من کامیارم؛ طراح گرافیک و علاقه‌مند به ساخت زبان‌های بصری متمایز برای محصولات، برندها و ایده‌ها.')}<div class="about-layout"><div class="about-art"><div class="about-art-bg"><span>THINK</span><span>MAKE</span><span>REFINE</span><div class="about-shape"></div></div><span class="about-caption">DESIGN IS A PROCESS.</span></div><div class="about-copy">${ey('رویکرد من')}<h2>از شناخت مسئله<br>تا اجرای دقیق.</h2><p>به نظرم طراحی خوب فقط ظاهر جذاب نیست؛ باید بتواند یک پیام را واضح‌تر کند، به محصول شخصیت بدهد و تجربه‌ای به‌یادماندنی بسازد.</p><p>در هر پروژه تلاش می‌کنم ابتدا مسئله و مخاطب را بشناسم، بعد سراغ ایده‌ها بروم و در نهایت با دقت روی جزئیات، خروجی را به نتیجه‌ای منسجم برسانم.</p><div class="approach-list"><div><span>۰۱</span><strong>شناخت و تحقیق</strong><small>درک هدف و مخاطب پروژه</small></div><div><span>۰۲</span><strong>ایده‌پردازی</strong><small>پیدا کردن مسیر بصری مناسب</small></div><div><span>۰۳</span><strong>اجرا و اصلاح</strong><small>توجه به جزئیات و کیفیت خروجی</small></div></div><a href="#/contact" class="button button-dark">درباره پروژه‌ات صحبت کنیم ${I('left',18)}</a></div></div></main>`;}
 
