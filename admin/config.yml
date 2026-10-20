@@ -14,9 +14,14 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Publication date, name: date, widget: datetime }
+      - { label: Publication date, name: date, widget: datetime, format: "YYYY-MM-DD" }
+      - { label: Category, name: category, widget: string, required: false, default: "مقاله" }
+      - { label: Short summary, name: excerpt, widget: text, required: false, hint: "خلاصه‌ای که در کارت مقاله‌ها نمایش داده می‌شود." }
       - { label: Featured image, name: thumbnail, widget: image, required: false }
-      - { label: Article body, name: body, widget: markdown }
+      - label: Article body
+        name: body
+        widget: markdown
+        hint: "برای افزودن باکس، یکی از الگوهای بلوک دانلود یا مقاله مرتبط را از راهنمای مدیریت سایت کپی کنید و داخل متن قرار دهید."
 
   - name: portfolio
     label: Portfolio
@@ -29,6 +34,7 @@ collections:
       - { label: Cover image, name: cover, widget: image }
       - { label: Category, name: category, widget: string }
       - { label: Year, name: year, widget: string }
+      - { label: Publication date, name: date, widget: datetime, format: "YYYY-MM-DD", required: false }
       - { label: Tags, name: tags, widget: list, required: false }
       - label: Gallery
         name: gallery
@@ -39,4 +45,4 @@ collections:
           label: Image
           name: image
           widget: image
-      - { label: Project details, name: body, widget: markdown }
+      - { label: Project details, name: body, widget: markdown, required: false }
