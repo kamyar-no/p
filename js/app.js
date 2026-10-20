@@ -12,10 +12,24 @@ function safeLink(value) {
 }
 function parseBlockFields(source) {
   const fields = {};
-  source.split('\n').forEach(line => {
+
+  source.split(/\r?\n/).forEach(line => {
     const match = line.match(/^\s*([\w-]+)\s*:\s*(.*?)\s*$/);
-    if (match) fields[match[1]] = match[2];
+    if (!match) return;
+
+    const key = match[1];
+    let value = match[2].trim();
+
+    // اگر آدرس به‌شکل لینک Markdown وارد شده باشد،
+    // فقط خود آدرس را نگه می‌داریم.
+    const markdownLink = value.match(/^\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+    if (markdownLink) {
+      value = markdownLink[2];
+    }
+
+    fields[key] = value;
   });
+
   return fields;
 }
 function renderSpecialBlock(type, fields) {
@@ -30,12 +44,173 @@ function renderSpecialBlock(type, fields) {
 function renderMarkdown(markdown) {
   const inline = (text) => {
     let s = esc(text);
+
     s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,(_,label,url)=>`<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`);
-    s = s.replace(/\*\*(.+?)\*\*|__(.+?)__/g,(_,a,b)=>`<strong>${a||b}</strong>`);
-    s = s.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)|_([^_\n]+)_/g,(_,a,b)=>`<em>${a||b}</em>`);
+
+    s = s.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,
+      (_, label, url) =>
+        `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    );
+
+    s = s.replace(
+      /\*\*(.+?)\*\*|__(.+?)__/g,
+      (_, a, b) => `<strong>${a || b}</strong>`
+    );
+
+    s = s.replace(
+      /(?<!\*)\*([^*\n]+)\*(?!\*)|_([^_\n]+)_/g,
+      (_, a, b) => `<em>${a || b}</em>`
+    );
+
     return s;
   };
+
+  const lines = String(markdown || '')
+    .replace(/\r\n?/g, '\n')
+    .split('\n');
+
+  const out = [];
+  let paragraph = [];
+  let list = null;
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+
+    let html = '';
+
+    paragraph.forEach((part, index) => {
+      html += inline(part.text);
+
+      if (index < paragraph.length - 1) {
+        html += part.hardBreak ? '<br>\n' : ' ';
+      }
+    });
+
+    out.push(`<p>${html}</p>`);
+    paragraph = [];
+  };
+
+  const closeList = () => {
+    if (list) {
+      out.push(`</${list}>`);
+      list = null;
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const t = line.trim();
+
+    if (!t) {
+      flushParagraph();
+      closeList();
+      continue;
+    }
+
+    // پشتیبانی از بلوک‌های دانلود، مقاله مرتبط و اطلاعیه
+    const specialStart = t.match(/^:::(download|related|notice)\s*$/);
+
+    if (specialStart) {
+      flushParagraph();
+      closeList();
+
+      const blockType = specialStart[1];
+      const blockLines = [];
+      let closed = false;
+
+      while (i + 1 < lines.length) {
+        const next = lines[++i];
+
+        if (next.trim() === ':::') {
+          closed = true;
+          break;
+        }
+
+        blockLines.push(next);
+      }
+
+      if (closed) {
+        out.push(
+          renderSpecialBlock(
+            blockType,
+            parseBlockFields(blockLines.join('\n'))
+          )
+        );
+      } else {
+        out.push(
+          `<pre>${esc(
+            [':::' + blockType, ...blockLines].join('\n')
+          )}</pre>`
+        );
+      }
+
+      continue;
+    }
+
+    // بک‌اسلش انتهای خط را به‌عنوان شکست خط Markdown تفسیر کن
+    const hardBreak = /\\+\s*$/.test(line);
+    const content = t.replace(/\\+\s*$/, '').trim();
+
+    // خطوطی که فقط بک‌اسلش دارند، نباید در خروجی دیده شوند
+    if (!content) {
+      if (hardBreak && paragraph.length) {
+        paragraph[paragraph.length - 1].hardBreak = true;
+      }
+      continue;
+    }
+
+    const heading = content.match(/^(#{1,6})\s+(.+)$/);
+    const bullet = content.match(/^[-*+]\s+(.+)$/);
+    const numbered = content.match(/^\d+[.)]\s+(.+)$/);
+    const quote = content.match(/^>\s?(.*)$/);
+
+    if (heading) {
+      flushParagraph();
+      closeList();
+
+      const level = heading[1].length;
+      out.push(
+        `<h${level}>${inline(heading[2])}</h${level}>`
+      );
+
+    } else if (bullet || numbered) {
+      flushParagraph();
+
+      const nextList = bullet ? 'ul' : 'ol';
+
+      if (list !== nextList) {
+        closeList();
+        out.push(`<${nextList}>`);
+        list = nextList;
+      }
+
+      out.push(
+        `<li>${inline((bullet || numbered)[1])}</li>`
+      );
+
+    } else if (quote) {
+      flushParagraph();
+      closeList();
+
+      out.push(
+        `<blockquote><p>${inline(quote[1])}</p></blockquote>`
+      );
+
+    } else {
+      closeList();
+      paragraph.push({
+        text: content,
+        hardBreak
+      });
+    }
+  }
+
+  flushParagraph();
+  closeList();
+
+  return out.join('\n');
+}
   const lines = String(markdown || '').replace(/\r\n?/g, '\n').split('\n');
   const out = [];
   let paragraph = [];
