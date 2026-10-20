@@ -5,7 +5,7 @@ thumbnail: /p/images/uploads/3.webp
 ---
 فونت‌های سری B از جمله خانواده‌های قدیمی و شناخته‌شده فونت فارسی هستند که سال‌ها در تایپ، صفحه‌آرایی، اسناد اداری و طراحی گرافیک مورد استفاده قرار گرفته‌اند. بسیاری از طراحان و کاربران کامپیوتر با نام‌هایی مانند B Nazanin، B Titr، B Mitra و B Roya آشنایی دارند؛ فونت‌هایی که هنوز هم در بسیاری از پروژه‌های فارسی دیده می‌شوند.
 
-در این مطلب از **فان و فکت**، به سراغ فونت‌های سری B رفته‌ایم تا بتوانید مجموعه موردنیاز خود را راحت‌تر پیدا کنید و برای استفاده در نرم‌افزارهای مختلف در اختیار داشته باشید.
+در این مطلب، به سراغ فونت‌های سری B رفته‌ایم تا بتوانید مجموعه موردنیاز خود را راحت‌تر پیدا کنید و برای استفاده در نرم‌افزارهای مختلف در اختیار داشته باشید.
 
 ## فونت‌های سری B چیستند؟
 
@@ -25,42 +25,3 @@ thumbnail: /p/images/uploads/3.webp
 این فهرست صرفاً نمونه‌ای از فونت‌های شناخته‌شده است و لزوماً تمام اعضای خانواده سری B را شامل نمی‌شود.\
 \
 در ادامه لینک دانلود نسخه استاندارد این فونت ها برای شما عزیزان قرار گرفته است.
-
-```
-<div style="background:#0d472e;color:#ffffff;padding:24px;border-radius:14px;text-align:center;margin:28px 0;font-family:Vazir,Estedad,sans-serif;direction:rtl">
-  <div style="font-size:32px;margin-bottom:10px">↓</div>
-  <h3 style="color:#ffffff;margin:0 0 12px;font-size:22px">
-    دانلود فونت‌های استاندارد سری B
-  </h3>
-  <p style="color:#e5eee8;margin:0 0 20px;line-height:2">
-    دریافت مجموعه فونت‌های فارسی برنا رایانه برای تایپ، صفحه‌آرایی و طراحی گرافیک.
-  </p>
-  <a href="https://example.com/download"
-     style="display:inline-block;background:#cc0202;color:#ffffff;padding:12px 26px;border-radius:8px;text-decoration:none;font-weight:bold">
-    دانلود مجموعه فونت‌ها
-  </a>
-  <p style="font-size:12px;color:#d0ded5;margin:16px 0 0">
-    پیش از انتشار، لینک واقعی فایل دانلود را جایگزین کنید.
-  </p>
-</div>
-```
-
-```
-<div style="background:#ffffff;color:#222222;padding:24px;border:1px solid #0d472e;border-radius:14px;text-align:right;margin:20px 0;font-family:Vazir,Estedad,sans-serif;direction:rtl">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-    <div style="background:#0d472e;color:#ffffff;width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">
-      i
-    </div>
-    <h3 style="color:#0d472e;margin:0;font-size:20px">
-      داستان فونت‌های B از کجا شروع شد؟
-    </h3>
-  </div>
-  <p style="color:#555555;line-height:2;margin:0 0 18px">
-    اگر دوست دارید با تاریخچه شکل‌گیری سری فونت‌های B و مسیر ورود آن‌ها به دنیای تایپ فارسی آشنا شوید، مقاله زیر را بخوانید.
-  </p>
-  <a href="https://kamyar-no.github.io/p/#/articles/%D8%AA%D8%A7%D8%B1%DB%8C%D8%AE%DA%86%D9%87-%D8%B4%DA%A9%D9%84-%DA%AF%DB%8C%D8%B1%DB%8C-%D8%B3%D8%B1%DB%8C-%D9%81%D9%88%D9%86%D8%AA-%D9%87%D8%A7%DB%8C-b"
-     style="display:block;background:#0d472e;color:#ffffff;padding:12px 16px;border-radius:8px;text-decoration:none;text-align:center;font-weight:bold">
-    مطالعه مقاله تاریخچه فونت‌های B ←
-  </a>
-</div>
-```
