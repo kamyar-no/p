@@ -5,6 +5,28 @@ const nav=[['/','خانه'],['/portfolio','نمونه‌کارها'],['/articles
 const paths={left:'<path d="M19 12H5M12 19l-7-7 7-7"/>',down:'<path d="M7 7l10 10M17 7v10H7"/>',up:'<path d="M18 15l-6-6-6 6M12 9v12"/>',menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',close:'<path d="M18 6L6 18M6 6l12 12"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 4.5v15"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',send:'<path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/>',pen:'<path d="m12 19 7-7 3 3-7 7-3-3zM2 22l4-1L17 10l-3-3L3 18z"/>',message:'<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/>',external:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',check:'<path d="m5 12 4 4L19 6"/>'};
 const I=(n,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[n]||paths.left}</svg>`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function safeLink(value) {
+  const url = String(value || '').trim();
+  if (/^(https?:\/\/|mailto:|tel:|#\/)/i.test(url)) return esc(url);
+  return '#';
+}
+function parseBlockFields(source) {
+  const fields = {};
+  source.split('\n').forEach(line => {
+    const match = line.match(/^\s*([\w-]+)\s*:\s*(.*?)\s*$/);
+    if (match) fields[match[1]] = match[2];
+  });
+  return fields;
+}
+function renderSpecialBlock(type, fields) {
+  const title = esc(fields.title || (type === 'download' ? 'دانلود فایل' : type === 'related' ? 'مطالعه مقاله مرتبط' : 'اطلاعیه'));
+  const description = esc(fields.description || fields.text || '');
+  const button = esc(fields.button || (type === 'download' ? 'دانلود فایل' : 'مطالعه مقاله'));
+  const url = safeLink(fields.url || fields.link || '');
+  if (type === 'download') return `<section class="article-special-box article-download-box"><div class="article-special-icon" aria-hidden="true">↓</div><h3>${title}</h3>${description ? `<p>${description}</p>` : ''}<a class="article-special-button" href="${url}" target="${/^https?:\/\//i.test(fields.url || fields.link || '') ? '_blank' : '_self'}" rel="noopener noreferrer">${button}</a></section>`;
+  if (type === 'related') return `<section class="article-special-box article-related-box"><div class="article-related-heading"><span class="article-special-icon" aria-hidden="true">i</span><h3>${title}</h3></div>${description ? `<p>${description}</p>` : ''}<a class="article-special-button" href="${url}">${button} ←</a></section>`;
+  return `<section class="article-special-box article-notice-box"><h3>${title}</h3><p>${description}</p></section>`;
+}
 function renderMarkdown(markdown) {
   const inline = (text) => {
     let s = esc(text);
@@ -30,11 +52,28 @@ function renderMarkdown(markdown) {
       list = null;
     }
   };
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const t = line.trim();
     if (!t) {
       flushParagraph();
       closeList();
+      continue;
+    }
+    const specialStart = t.match(/^:::(download|related|notice)\s*$/);
+    if (specialStart) {
+      flushParagraph();
+      closeList();
+      const blockType = specialStart[1];
+      const blockLines = [];
+      let closed = false;
+      while (i + 1 < lines.length) {
+        const next = lines[++i];
+        if (next.trim() === ':::') { closed = true; break; }
+        blockLines.push(next);
+      }
+      if (closed) out.push(renderSpecialBlock(blockType, parseBlockFields(blockLines.join('\n'))));
+      else out.push(`<pre>${esc([':::' + blockType, ...blockLines].join('\n'))}</pre>`);
       continue;
     }
     const heading = t.match(/^(#{1,6})\s+(.+)$/);
@@ -118,7 +157,7 @@ function articleDetail(id) {
 
     <article>
       <div class="article-detail-heading">
-        ${ey(`${esc(a.category)} · ${esc(a.date)} · ${esc(a.read)} مطالعه`)}
+        ${ey(`${esc(a.category)}${a.date ? ' · ' + esc(formatArticleDate(a.date)) : ''}`)}
         <h1>${esc(a.title)}</h1>
       </div>
 
@@ -131,10 +170,6 @@ function articleDetail(id) {
       <div class="article-body">
         ${bodyHTML}
 
-        <div class="article-callout">
-          <span>یادداشت طراحی</span>
-          <p>بهترین تصمیم بصری، تصمیمی است که هم زیبا باشد و هم دلیل روشنی برای بودن داشته باشد.</p>
-        </div>
       </div>
     </article>
 
@@ -215,7 +250,7 @@ async function loadCMSContent(){
   for(const item of cmsProjects){
     const gallery=Array.isArray(item.gallery)?item.gallery.map(x=>typeof x==='string'?x:x?.image).filter(Boolean):[];
     const tags=Array.isArray(item.tags)?item.tags:[];
-    const project={id:item.id,title:item.title||item.id,description:item.description||'',image:item.cover||item.image||'',category:item.category||'نمونه‌کار',year:item.year||'۱۴۰۵',tags,gallery};
+    const project={id:item.id,title:item.title||item.id,description:item.description||'',image:item.cover||item.image||'',category:item.category||'نمونه‌کار',year:item.year||'۱۴۰۵',date:item.date||'',tags,gallery};
     const index=projects.findIndex(p=>p.id===project.id);
     if(index>=0)projects[index]={...projects[index],...project};
     else projects.push(project);
@@ -228,6 +263,18 @@ async function loadCMSContent(){
     if(index>=0)articles[index]={...articles[index],...article};
     else articles.push(article);
   }
+  const dateValue = value => {
+    const time = Date.parse(String(value || ''));
+    return Number.isFinite(time) ? time : 0;
+  };
+  articles.sort((a,b) => dateValue(b.date) - dateValue(a.date) || String(b.id).localeCompare(String(a.id)));
+  projects.sort((a,b) => {
+    const dateA = dateValue(a.date);
+    const dateB = dateValue(b.date);
+    if (dateA || dateB) return dateB - dateA;
+    const yearNumber = value => Number(String(value || '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[^0-9]/g,'')) || 0;
+    return yearNumber(b.year) - yearNumber(a.year) || String(b.id).localeCompare(String(a.id));
+  });
 }
 
 function render(){
